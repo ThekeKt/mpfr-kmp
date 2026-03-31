@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "kmp-library-template"
+rootProject.name = "mpfr-kmp"
 include(":library")

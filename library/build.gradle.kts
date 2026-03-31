@@ -13,7 +13,7 @@ version = "0.0.0"
 kotlin {
     jvm()
     androidLibrary {
-        namespace = "io.github.thekekt.kmp.library.template"
+        namespace = "io.github.thekekt.mpfrkmp"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -55,10 +55,11 @@ mavenPublishing {
     coordinates(group.toString(), "library", version.toString())
 
     pom {
-        name = "My library"
-        description = "A library."
-        inceptionYear = "2024"
-        url = "https://github.com/thekekt/kmp-library-template/"
+        name = "MPFR for Kotlin Multiplatform"
+        description = "Kotlin bindings for the MPFR scientific computation to be able to be used " +
+                "on most of the common targets, including JVM, Android, Linux and wasmJs"
+        inceptionYear = "2026"
+        url = "https://github.com/thekekt/mpfr-kmp/"
         licenses {
             license {
                 name = "XXX"

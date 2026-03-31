@@ -1,1 +1,1 @@
-# ThekeKt KMP library template
+# ThekeKt — MPFR for KMP (WIP)
