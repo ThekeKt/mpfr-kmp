@@ -1,0 +1,22 @@
+# Backup Linux build env for MPFR+GMP.
+# Primary on Windows: WSL2 or an MSYS2 (MinGW-w64 / UCRT64) shell.
+#
+# Docker Desktop on Windows uses the WSL2 backend by default — on this host,
+# Docker and WSL/MSYS2 share the same kernel. Docker is the cross-host
+# portable form (CI, macOS, Linux); WSL/MSYS2 is the host-native form. Both
+# produce the same `third_party/mpfr/install/` artifacts.
+
+services:
+  mpfr-build:
+    build: .
+    image: mpfr-kmp/build:local
+    container_name: mpfr-kmp-build
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+    # Default command: interactive shell. Override per-invocation:
+    #   docker compose run --rm mpfr-build bash -c 'cd /workspace/third_party/mpfr && bash build.sh'
+    stdin_open: true
+    tty: true
