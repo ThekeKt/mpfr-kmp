@@ -1,0 +1,16 @@
+mpfr-kmp
+Copyright 2026 The mpfr-kmp authors
+
+This product includes software developed by third parties. Attribution:
+
+- GNU MPFR 4.2.1 — Multiple Precision Floating-Point Reliable
+  Copyright (C) 2000-2024 The MPFR Team and contributors.
+  Licensed under LGPL-3.0-or-later.
+  <https://www.mpfr.org/>
+
+- GNU GMP 6.3.0 — GNU Multiple Precision Arithmetic Library
+  Copyright (C) 1991-2024 Free Software Foundation, Inc. and contributors.
+  Licensed under LGPL-3.0-or-later (dual: GPL-2.0-or-later).
+  <https://gmplib.org/>
+
+For full license texts and a list of authors, see `THIRD_PARTY_LICENSES.md`.
