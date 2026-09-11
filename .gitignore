@@ -1,13 +1,36 @@
+# Kotlin / Gradle / IDE
 *.iml
 .gradle
-.idea
-.DS_Store
 build
 captures
 .externalNativeBuild
 .cxx
+.kotlin
 local.properties
 xcuserdata
-.kotlin
-#So we don't accidentally commit our private keys
+.idea
+.DS_Store
+.vscode
+
 *.gpg
+
+# Native build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Environment-specific files
+.env
+.env.local
+*.env
+
+# Other
+.llm_context/
+.kilo/
+.playwright-mcp/
+temp
+temp2
+.jj/
