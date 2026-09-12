@@ -10,5 +10,7 @@ apiValidation {
     // API gate for the v0.0.1 matrix (JVM + Android class files). The Kotlin/Native
     // klib ABI dump is enabled together with the native targets (v1.x cinterop layer);
     // with no klib-producing target it fails as of BCV 0.18 otherwise.
-    klib.enabled = true
+    klib.enabled = false
+    // The FFI seam (Repr bytes, MpfrBridge, opcode tables) is plumbing, not API.
+    ignoredPackages.add("io.github.thekekt.mpfr.internal")
 }

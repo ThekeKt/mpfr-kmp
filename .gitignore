@@ -27,6 +27,9 @@ xcuserdata
 .env.local
 *.env
 
+# Shim build outputs (library/native/jni/build-shim.sh / CMakeLists)
+library/native/build/
+
 # Other
 .llm_context/
 .kilo/

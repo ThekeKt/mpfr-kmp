@@ -1,10 +1,501 @@
-public final class io/github/thekekt/template/SampleKt {
-	public static final fun printStrings ()V
+public final class io/github/thekekt/mpfr/BigInteger_jvmKt {
+	public static final fun of (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Ljava/math/BigInteger;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun of$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Ljava/math/BigInteger;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun toBigInteger (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;)Ljava/math/BigInteger;
+	public static synthetic fun toBigInteger$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Ljava/math/BigInteger;
 }
 
-public final class io/github/thekekt/template/Strings_jvmKt {
-	public static final fun getFirstString ()Ljava/lang/String;
-	public static final fun getPlatformName ()Ljava/lang/String;
-	public static final fun getSecondString ()Ljava/lang/String;
+public abstract interface annotation class io/github/thekekt/mpfr/InternalMpfrApi : java/lang/annotation/Annotation {
+}
+
+public final class io/github/thekekt/mpfr/MpfrExceptionFlag : java/lang/Enum {
+	public static final field DIVBY0 Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+	public static final field ERANGE Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+	public static final field INEXACT Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+	public static final field NAN Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+	public static final field OVERFLOW Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+	public static final field UNDERFLOW Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+	public static fun values ()[Lio/github/thekekt/mpfr/MpfrExceptionFlag;
+}
+
+public final class io/github/thekekt/mpfr/MpfrExceptionFlags {
+	public static final field Companion Lio/github/thekekt/mpfr/MpfrExceptionFlags$Companion;
+	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDivideByZero ()Z
+	public final fun getErange ()Z
+	public final fun getFlags ()Ljava/util/Set;
+	public final fun getInexact ()Z
+	public final fun getNan ()Z
+	public final fun getOverflow ()Z
+	public final fun getSize ()I
+	public final fun getUnderflow ()Z
+	public fun hashCode ()I
+	public final fun isEmpty ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/MpfrExceptionFlags$Companion {
+	public final fun clear (Lio/github/thekekt/mpfr/MpfrExceptionFlag;)V
+	public final fun clearAll ()V
+	public final fun current ()Lio/github/thekekt/mpfr/MpfrExceptionFlags;
+	public final fun getNONE ()Lio/github/thekekt/mpfr/MpfrExceptionFlags;
+	public final fun save-Z3SBcGQ ()I
+	public final fun set (Lio/github/thekekt/mpfr/MpfrExceptionFlag;)V
+	public final fun test-0LTQA7c (I)Lio/github/thekekt/mpfr/MpfrExceptionFlags;
+}
+
+public final class io/github/thekekt/mpfr/MpfrFlagsMask {
+	public static final field Companion Lio/github/thekekt/mpfr/MpfrFlagsMask$Companion;
+	public static final fun and-zRTkf1o (II)I
+	public static final synthetic fun box-impl (I)Lio/github/thekekt/mpfr/MpfrFlagsMask;
+	public static final fun contains-impl (ILio/github/thekekt/mpfr/MpfrExceptionFlag;)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (ILjava/lang/Object;)Z
+	public static final fun equals-impl0 (II)Z
+	public fun hashCode ()I
+	public static fun hashCode-impl (I)I
+	public static final fun invert-NNr_e_s (I)I
+	public static final fun isEmpty-impl (I)Z
+	public static final fun plus-zRTkf1o (II)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (I)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()I
+}
+
+public final class io/github/thekekt/mpfr/MpfrFlagsMask$Companion {
+	public final fun getALL-NNr_e_s ()I
+	public final fun getNONE-NNr_e_s ()I
+	public final fun of-fgWIVGo ([Lio/github/thekekt/mpfr/MpfrExceptionFlag;)I
+}
+
+public final class io/github/thekekt/mpfr/MpfrFlagsSnapshot {
+	public static final synthetic fun box-impl (I)Lio/github/thekekt/mpfr/MpfrFlagsSnapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (ILjava/lang/Object;)Z
+	public static final fun equals-impl0 (II)Z
+	public fun hashCode ()I
+	public static fun hashCode-impl (I)I
+	public static final fun restore-0LTQA7c (II)V
+	public static synthetic fun restore-0LTQA7c$default (IIILjava/lang/Object;)V
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (I)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()I
+}
+
+public final class io/github/thekekt/mpfr/MpfrFloat : java/lang/Comparable {
+	public static final field Companion Lio/github/thekekt/mpfr/MpfrFloat$Companion;
+	public synthetic fun <init> (Lio/github/thekekt/mpfr/internal/Repr;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun abs ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun acos (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun acos$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun acosh (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun acosh$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun add (DLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun add (JLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun add (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun add$default (Lio/github/thekekt/mpfr/MpfrFloat;DLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun add$default (Lio/github/thekekt/mpfr/MpfrFloat;JLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun add$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun agm (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun agm$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun asin (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun asin$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun asinh (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun asinh$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun atan (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun atan$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun atan2 (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun atan2$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun atanh (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun atanh$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun cbrt (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun cbrt$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun ceil ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public fun compareTo (Lio/github/thekekt/mpfr/MpfrFloat;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public final fun compound (JLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun compound$default (Lio/github/thekekt/mpfr/MpfrFloat;JLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun cos (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun cos$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun cosh (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun cosh$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun cospi (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun cospi$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun digamma (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun digamma$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun dim (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun dim$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun div (D)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun div (DLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun div (J)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun div (JLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun div (Lio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun div (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun div$default (Lio/github/thekekt/mpfr/MpfrFloat;DLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun div$default (Lio/github/thekekt/mpfr/MpfrFloat;JLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun div$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun equalUlps (Lio/github/thekekt/mpfr/MpfrFloat;I)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun erf (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun erf$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun erfc (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun erfc$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun exp (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun exp$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun exp10 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun exp10$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun exp10m1 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun exp10m1$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun exp2 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun exp2$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun exp2m1 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun exp2m1$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun expm1 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun expm1$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun fitsInt (Lio/github/thekekt/mpfr/RoundingMode;)Z
+	public static synthetic fun fitsInt$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Z
+	public final fun fitsLong (Lio/github/thekekt/mpfr/RoundingMode;)Z
+	public static synthetic fun fitsLong$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Z
+	public final fun floor ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun fma (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun fma$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun fmod (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun fmod$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun fms (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun fms$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun format (Lio/github/thekekt/mpfr/core/NumberStyle;ILio/github/thekekt/mpfr/RoundingMode;)Ljava/lang/String;
+	public static synthetic fun format$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/core/NumberStyle;ILio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun fractional (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun fractional$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun gamma (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun gamma$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun getKind ()Lio/github/thekekt/mpfr/core/MpfrKind;
+	public final fun getPrecision ()Lio/github/thekekt/mpfr/MpfrPrecision;
+	public final fun getSign ()Lio/github/thekekt/mpfr/core/Sign;
+	public final fun gt (Lio/github/thekekt/mpfr/MpfrFloat;)Z
+	public final fun gte (Lio/github/thekekt/mpfr/MpfrFloat;)Z
+	public fun hashCode ()I
+	public final fun hypot (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun hypot$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun isFinite ()Z
+	public final fun isInfinite ()Z
+	public final fun isInteger ()Z
+	public final fun isLessOrGreater (Lio/github/thekekt/mpfr/MpfrFloat;)Z
+	public final fun isNaN ()Z
+	public final fun isNegative ()Z
+	public final fun isUnorderedWith (Lio/github/thekekt/mpfr/MpfrFloat;)Z
+	public final fun isZero ()Z
+	public final fun lngamma (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun lngamma$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun log (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun log$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun log10 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun log10$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun log10p1 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun log10p1$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun log1p (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun log1p$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun log2 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun log2$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun log2p1 (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun log2p1$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun lt (Lio/github/thekekt/mpfr/MpfrFloat;)Z
+	public final fun lte (Lio/github/thekekt/mpfr/MpfrFloat;)Z
+	public final fun max (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun max$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun min (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun min$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun minus (D)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun minus (J)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun minus (Lio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun mul (DLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun mul (JLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun mul (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun mul$default (Lio/github/thekekt/mpfr/MpfrFloat;DLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun mul$default (Lio/github/thekekt/mpfr/MpfrFloat;JLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun mul$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun nextDown ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun nextUp ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun plus (D)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun plus (J)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun plus (Lio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun pow (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun pow$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun reciprocalSqrt (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun reciprocalSqrt$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun relativeDifference (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun relativeDifference$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun remainder (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun remainder$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun root (ILio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun root$default (Lio/github/thekekt/mpfr/MpfrFloat;ILio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun round ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun roundToEven ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun shl (ILio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun shl$default (Lio/github/thekekt/mpfr/MpfrFloat;ILio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun shr (ILio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun shr$default (Lio/github/thekekt/mpfr/MpfrFloat;ILio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun sin (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sin$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun sinCos (Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/core/SinCosResult;
+	public static synthetic fun sinCos$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/core/SinCosResult;
+	public final fun sinh (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sinh$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun sinpi (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sinpi$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun split (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/core/IntegerAndFraction;
+	public static synthetic fun split$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/core/IntegerAndFraction;
+	public final fun sqr (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sqr$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun sqrt (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sqrt$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun sub (DLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun sub (JLio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun sub (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sub$default (Lio/github/thekekt/mpfr/MpfrFloat;DLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sub$default (Lio/github/thekekt/mpfr/MpfrFloat;JLio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sub$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun tan (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun tan$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun tanh (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun tanh$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun tanpi (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun tanpi$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun times (D)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun times (J)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun times (Lio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun toDouble (Lio/github/thekekt/mpfr/RoundingMode;)D
+	public static synthetic fun toDouble$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)D
+	public final fun toFloat (Lio/github/thekekt/mpfr/RoundingMode;)F
+	public static synthetic fun toFloat$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)F
+	public final fun toInt (Lio/github/thekekt/mpfr/RoundingMode;)I
+	public static synthetic fun toInt$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)I
+	public final fun toLong (Lio/github/thekekt/mpfr/RoundingMode;)J
+	public static synthetic fun toLong$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)J
+	public fun toString ()Ljava/lang/String;
+	public final fun toString (ILio/github/thekekt/mpfr/RoundingMode;)Ljava/lang/String;
+	public static synthetic fun toString$default (Lio/github/thekekt/mpfr/MpfrFloat;ILio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun totalOrder (Lio/github/thekekt/mpfr/MpfrFloat;)Z
+	public final fun truncate (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun truncate$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun unaryMinus ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun zeta (Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun zeta$default (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+}
+
+public final class io/github/thekekt/mpfr/MpfrFloat$Companion {
+	public final fun E (Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun E$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun Infinity (Lio/github/thekekt/mpfr/core/Sign;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun Infinity$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Lio/github/thekekt/mpfr/core/Sign;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun NaN (Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun NaN$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun PI (Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun PI$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun Zero (Lio/github/thekekt/mpfr/core/Sign;Lio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun Zero$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Lio/github/thekekt/mpfr/core/Sign;Lio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun dot (Ljava/util/List;Ljava/util/List;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun dot$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Ljava/util/List;Ljava/util/List;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun factorial (JLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun factorial$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;JLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun getDefaultPrecision ()Lio/github/thekekt/mpfr/MpfrPrecision;
+	public final fun of (DLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun of (FLio/github/thekekt/mpfr/MpfrPrecision;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun of (JLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun of$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;DLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun of$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;FLio/github/thekekt/mpfr/MpfrPrecision;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun of$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;JLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun of-E0BElUM (JLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun of-E0BElUM$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;JLio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun parse (Ljava/lang/String;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;I)Lio/github/thekekt/mpfr/core/Result;
+	public static synthetic fun parse$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Ljava/lang/String;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;IILjava/lang/Object;)Lio/github/thekekt/mpfr/core/Result;
+	public final fun setDefaultPrecision (Lio/github/thekekt/mpfr/MpfrPrecision;)V
+	public final fun sum (Ljava/util/List;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static synthetic fun sum$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Ljava/util/List;Lio/github/thekekt/mpfr/MpfrPrecision;Lio/github/thekekt/mpfr/RoundingMode;ILjava/lang/Object;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun withDefaultPrecision (Lio/github/thekekt/mpfr/MpfrPrecision;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun withDefaultPrecision$default (Lio/github/thekekt/mpfr/MpfrFloat$Companion;Lio/github/thekekt/mpfr/MpfrPrecision;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class io/github/thekekt/mpfr/MpfrLoadException : java/lang/RuntimeException {
+}
+
+public final class io/github/thekekt/mpfr/MpfrPrecision : java/lang/Comparable {
+	public static final field Companion Lio/github/thekekt/mpfr/MpfrPrecision$Companion;
+	public static final field DOUBLE_BITS I
+	public static final field MAX_BITS I
+	public static final field MIN_BITS I
+	public static final field SINGLE_BITS I
+	public fun <init> (I)V
+	public fun <init> (J)V
+	public fun compareTo (Lio/github/thekekt/mpfr/MpfrPrecision;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBits ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/MpfrPrecision$Companion {
+}
+
+public final class io/github/thekekt/mpfr/MpfrRangeException : java/lang/RuntimeException {
+}
+
+public final class io/github/thekekt/mpfr/OperatorsKt {
+	public static final fun minus (DLio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun minus (ILio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun minus (JLio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun plus (DLio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun plus (ILio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun plus (JLio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun times (DLio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun times (ILio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+	public static final fun times (JLio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/MpfrFloat;
+}
+
+public final class io/github/thekekt/mpfr/RoundingMode : java/lang/Enum {
+	public static final field AWAY_FROM_ZERO Lio/github/thekekt/mpfr/RoundingMode;
+	public static final field Companion Lio/github/thekekt/mpfr/RoundingMode$Companion;
+	public static final field NEAREST_EVEN Lio/github/thekekt/mpfr/RoundingMode;
+	public static final field TOWARD_NEGATIVE Lio/github/thekekt/mpfr/RoundingMode;
+	public static final field TOWARD_POSITIVE Lio/github/thekekt/mpfr/RoundingMode;
+	public static final field TOWARD_ZERO Lio/github/thekekt/mpfr/RoundingMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/thekekt/mpfr/RoundingMode;
+	public static fun values ()[Lio/github/thekekt/mpfr/RoundingMode;
+}
+
+public final class io/github/thekekt/mpfr/RoundingMode$Companion {
+	public final fun getDEFAULT ()Lio/github/thekekt/mpfr/RoundingMode;
+}
+
+public final class io/github/thekekt/mpfr/RoundingModeKt {
+	public static final fun withRoundingMode (Lio/github/thekekt/mpfr/RoundingMode;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class io/github/thekekt/mpfr/core/IntegerAndFraction {
+	public fun <init> (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;)V
+	public final fun component1 ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun component2 ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun copy (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/core/IntegerAndFraction;
+	public static synthetic fun copy$default (Lio/github/thekekt/mpfr/core/IntegerAndFraction;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;ILjava/lang/Object;)Lio/github/thekekt/mpfr/core/IntegerAndFraction;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFraction ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun getInteger ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/thekekt/mpfr/core/MpfrError {
+}
+
+public final class io/github/thekekt/mpfr/core/MpfrKind : java/lang/Enum {
+	public static final field INF Lio/github/thekekt/mpfr/core/MpfrKind;
+	public static final field NAN Lio/github/thekekt/mpfr/core/MpfrKind;
+	public static final field REGULAR Lio/github/thekekt/mpfr/core/MpfrKind;
+	public static final field ZERO Lio/github/thekekt/mpfr/core/MpfrKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/thekekt/mpfr/core/MpfrKind;
+	public static fun values ()[Lio/github/thekekt/mpfr/core/MpfrKind;
+}
+
+public abstract interface class io/github/thekekt/mpfr/core/MpfrParseError : io/github/thekekt/mpfr/core/MpfrError {
+}
+
+public final class io/github/thekekt/mpfr/core/MpfrParseError$ExponentSyntax : io/github/thekekt/mpfr/core/MpfrParseError {
+	public static final field INSTANCE Lio/github/thekekt/mpfr/core/MpfrParseError$ExponentSyntax;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/core/MpfrParseError$MalformedInput : io/github/thekekt/mpfr/core/MpfrParseError {
+	public static final field INSTANCE Lio/github/thekekt/mpfr/core/MpfrParseError$MalformedInput;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/core/MpfrParseError$UnsupportedBase : io/github/thekekt/mpfr/core/MpfrParseError {
+	public static final field INSTANCE Lio/github/thekekt/mpfr/core/MpfrParseError$UnsupportedBase;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/core/MpfrRangeError : io/github/thekekt/mpfr/core/MpfrError {
+	public static final field INSTANCE Lio/github/thekekt/mpfr/core/MpfrRangeError;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/core/NumberStyle : java/lang/Enum {
+	public static final field FIXED Lio/github/thekekt/mpfr/core/NumberStyle;
+	public static final field GENERAL Lio/github/thekekt/mpfr/core/NumberStyle;
+	public static final field SCIENTIFIC Lio/github/thekekt/mpfr/core/NumberStyle;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/thekekt/mpfr/core/NumberStyle;
+	public static fun values ()[Lio/github/thekekt/mpfr/core/NumberStyle;
+}
+
+public abstract interface class io/github/thekekt/mpfr/core/Result {
+}
+
+public final class io/github/thekekt/mpfr/core/Result$Failure : io/github/thekekt/mpfr/core/Result {
+	public fun <init> (Lio/github/thekekt/mpfr/core/MpfrError;)V
+	public final fun component1 ()Lio/github/thekekt/mpfr/core/MpfrError;
+	public final fun copy (Lio/github/thekekt/mpfr/core/MpfrError;)Lio/github/thekekt/mpfr/core/Result$Failure;
+	public static synthetic fun copy$default (Lio/github/thekekt/mpfr/core/Result$Failure;Lio/github/thekekt/mpfr/core/MpfrError;ILjava/lang/Object;)Lio/github/thekekt/mpfr/core/Result$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lio/github/thekekt/mpfr/core/MpfrError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/core/Result$Success : io/github/thekekt/mpfr/core/Result {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/thekekt/mpfr/core/Result$Success;
+	public static synthetic fun copy$default (Lio/github/thekekt/mpfr/core/Result$Success;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/thekekt/mpfr/core/Result$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/thekekt/mpfr/core/ResultKt {
+	public static final fun discard (Lio/github/thekekt/mpfr/core/Result;)Lio/github/thekekt/mpfr/core/Result;
+	public static final fun failure (Lio/github/thekekt/mpfr/core/MpfrError;)Lio/github/thekekt/mpfr/core/Result;
+	public static final fun map (Lio/github/thekekt/mpfr/core/Result;Lkotlin/jvm/functions/Function1;)Lio/github/thekekt/mpfr/core/Result;
+	public static final fun onFailure (Lio/github/thekekt/mpfr/core/Result;Lkotlin/jvm/functions/Function1;)Lio/github/thekekt/mpfr/core/Result;
+	public static final fun onSuccess (Lio/github/thekekt/mpfr/core/Result;Lkotlin/jvm/functions/Function1;)Lio/github/thekekt/mpfr/core/Result;
+	public static final fun success (Ljava/lang/Object;)Lio/github/thekekt/mpfr/core/Result;
+}
+
+public final class io/github/thekekt/mpfr/core/Sign : java/lang/Enum {
+	public static final field NEGATIVE Lio/github/thekekt/mpfr/core/Sign;
+	public static final field POSITIVE Lio/github/thekekt/mpfr/core/Sign;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun negate ()Lio/github/thekekt/mpfr/core/Sign;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/thekekt/mpfr/core/Sign;
+	public static fun values ()[Lio/github/thekekt/mpfr/core/Sign;
+}
+
+public final class io/github/thekekt/mpfr/core/SinCosResult {
+	public fun <init> (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;)V
+	public final fun component1 ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun component2 ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun copy (Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;)Lio/github/thekekt/mpfr/core/SinCosResult;
+	public static synthetic fun copy$default (Lio/github/thekekt/mpfr/core/SinCosResult;Lio/github/thekekt/mpfr/MpfrFloat;Lio/github/thekekt/mpfr/MpfrFloat;ILjava/lang/Object;)Lio/github/thekekt/mpfr/core/SinCosResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCos ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public final fun getSin ()Lio/github/thekekt/mpfr/MpfrFloat;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
