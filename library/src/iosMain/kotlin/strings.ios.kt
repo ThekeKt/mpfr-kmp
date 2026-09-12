@@ -1,6 +1,6 @@
 package io.github.thekekt.template
 
-actual val platformName: String = "iOS"
+public actual val platformName: String = "iOS"
 
-actual val firstString: String = "$platformName 1st String"
-actual val secondString: String = "$platformName 2nd String"
+public actual val firstString: String = "$platformName 1st String"
+public actual val secondString: String = "$platformName 2nd String"

@@ -1,10 +1,10 @@
 package io.github.thekekt.template
 
-fun printStrings() {
+public fun printStrings() {
     println("The first string is: $firstString !")
     println("The second string is: $secondString !")
 }
 
-expect val platformName : String
-expect val firstString: String
-expect val secondString: String
+public expect val platformName : String
+public expect val firstString: String
+public expect val secondString: String

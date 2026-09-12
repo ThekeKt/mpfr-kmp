@@ -1,0 +1,10 @@
+public final class io/github/thekekt/template/SampleKt {
+	public static final fun printStrings ()V
+}
+
+public final class io/github/thekekt/template/Strings_jvmKt {
+	public static final fun getFirstString ()Ljava/lang/String;
+	public static final fun getPlatformName ()Ljava/lang/String;
+	public static final fun getSecondString ()Ljava/lang/String;
+}
+
