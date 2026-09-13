@@ -8,7 +8,9 @@ plugins {
 }
 
 group = "io.github.thekekt"
-version = "0.0.0"
+// Snapshot until the first real release: an accidental `publish` then targets the
+// mutable snapshot repo, never the immutable Maven Central release path.
+version = "0.0.1-SNAPSHOT"
 
 kotlin {
     // No accidental public API in the published library surface.
@@ -85,28 +87,29 @@ mavenPublishing {
 
     pom {
         name = "MPFR for Kotlin Multiplatform"
-        description = "Kotlin bindings for the MPFR scientific computation to be able to be used " +
-                "on most of the common targets, including JVM, Android, Linux and wasmJs"
+        description = "Kotlin Multiplatform bindings for GNU MPFR: arbitrary-precision, " +
+                "correctly-rounded floating-point arithmetic. JVM and Android today; " +
+                "Kotlin/Native, JS and Wasm targets planned."
         inceptionYear = "2026"
-        url = "https://github.com/thekekt/mpfr-kmp/"
+        url = "https://github.com/ThekeKt/mpfr-kmp"
         licenses {
             license {
-                name = "XXX"
-                url = "YYY"
-                distribution = "ZZZ"
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "repo"
             }
         }
         developers {
             developer {
-                id = "XXX"
-                name = "YYY"
-                url = "ZZZ"
+                id = "thekekt"
+                name = "ThekeKt"
+                url = "https://github.com/ThekeKt"
             }
         }
         scm {
-            url = "XXX"
-            connection = "YYY"
-            developerConnection = "ZZZ"
+            url = "https://github.com/ThekeKt/mpfr-kmp"
+            connection = "scm:git:https://github.com/ThekeKt/mpfr-kmp.git"
+            developerConnection = "scm:git:ssh://github.com/ThekeKt/mpfr-kmp.git"
         }
     }
 }
