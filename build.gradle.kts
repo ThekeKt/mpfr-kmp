@@ -1,4 +1,7 @@
+import io.github.thekekt.mpfr.quality.ExposurePatterns
+
 plugins {
+    base
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlinMultiplatform) apply  false
     alias(libs.plugins.vanniktech.mavenPublish) apply false
@@ -13,4 +16,21 @@ apiValidation {
     klib.enabled = false
     // The FFI seam (Repr bytes, MpfrBridge, opcode tables) is plumbing, not API.
     ignoredPackages.add("io.github.thekekt.mpfr.internal")
+}
+
+// Zero-internal-exposure gate: committed public artifacts must be self-describing
+// (no internal ids / unpublished document references). The pattern list lives in
+// a single place — buildSrc ExposurePatterns.kt — and `check` enforces it.
+val checkZeroExposure by tasks.registering(io.github.thekekt.mpfr.quality.ZeroExposureTask::class) {
+    scanRoot = layout.projectDirectory
+    includeGlobs = ExposurePatterns.includeGlobs
+    excludeGlobs = ExposurePatterns.excludeGlobs
+    skipDirs = ExposurePatterns.skipDirs.toList()
+    rules = ExposurePatterns.rules.associate { it.id to it.regex.pattern }
+    exemptFileRules = ExposurePatterns.exemptions.mapValues { it.value.toList() }
+    binaryExtensions = ExposurePatterns.binaryExtensions.toList()
+}
+
+tasks.named("check") {
+    dependsOn(checkZeroExposure)
 }
