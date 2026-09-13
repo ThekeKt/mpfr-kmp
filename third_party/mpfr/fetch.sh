@@ -37,32 +37,29 @@ fetch_and_extract() {
     local expected_sha="$4"
     local sentinel="${tarball}.sha256-verified"
 
-    # Skip re-verification if we already verified this tarball's SHA256 in a
-    # previous run and the file hasn't been replaced since.
-    if [[ -f "$tarball" && -f "$sentinel" ]] && [[ "$(cat "$sentinel" 2>/dev/null)" == "$expected_sha" ]]; then
-        echo ">> Reusing already-verified $tarball (sentinel matches)"
-    else
-        if [[ ! -f "$tarball" ]]; then
-            echo ">> Downloading $url"
-            curl -fL --retry 3 -o "$tarball" "$url"
-        else
-            echo ">> Reusing existing $tarball"
-        fi
-
-        echo ">> Verifying SHA256"
-        local actual_sha
-        actual_sha="$(sha256sum "$tarball" | awk '{print $1}')"
-        if [[ "$actual_sha" != "$expected_sha" ]]; then
-            echo "ERROR: SHA256 mismatch for $tarball" >&2
-            echo "  expected: $expected_sha" >&2
-            echo "  actual:   $actual_sha" >&2
-            echo "  bump version in fetch.sh if upstream re-released" >&2
-            rm -f "$sentinel"
-            exit 1
-        fi
-
-        echo "$expected_sha" > "$sentinel"
+    # The sentinel marks a previous verification; it NEVER authorizes skipping
+    # the hash step. Tarballs are committed in this repo (git checkout is not a
+    # download cache) and any on-disk copy can be corrupted or swapped, so the
+    # bytes present are re-hashed on every run and mismatch is fatal.
+    if [[ ! -f "$tarball" || ! -s "$tarball" ]]; then
+        echo ">> Downloading $url"
+        curl -fL --retry 3 -o "$tarball" "$url"
     fi
+
+    echo ">> Verifying SHA256"
+    local actual_sha
+    actual_sha="$(sha256sum "$tarball" | awk '{print $1}')"
+    if [[ "$actual_sha" != "$expected_sha" ]]; then
+        echo "ERROR: SHA256 mismatch for $tarball" >&2
+        echo "  expected: $expected_sha" >&2
+        echo "  actual:   $actual_sha" >&2
+        echo "  the local copy was deleted; re-check or bump version in fetch.sh " >&2
+        echo "  only after confirming upstream re-released" >&2
+        rm -f "$tarball" "$sentinel"
+        exit 1
+    fi
+
+    echo "$expected_sha" > "$sentinel"
 
     echo ">> Extracting $tarball -> $target_dir"
     mkdir -p "$target_dir"
