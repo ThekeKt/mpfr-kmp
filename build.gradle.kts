@@ -16,6 +16,8 @@ apiValidation {
     klib.enabled = false
     // The FFI seam (Repr bytes, MpfrBridge, opcode tables) is plumbing, not API.
     ignoredPackages.add("io.github.thekekt.mpfr.internal")
+    // The consumer harness compiles against the public surface but publishes nothing.
+    ignoredProjects.add("examples")
 }
 
 // Zero-internal-exposure gate: committed public artifacts must be self-describing

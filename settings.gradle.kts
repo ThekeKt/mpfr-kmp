@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "mpfr-kmp"
 include(":library")
+include(":examples")
