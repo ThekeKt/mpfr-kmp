@@ -9,6 +9,10 @@ import java.io.File
  *  1. `-Dmpfrkmp.native.file=<path>` env `MPFRKMP_NATIVE_FILE` — absolute dev/CI override;
  *  2. `-Dmpfrkmp.native.dir=<dir>` / env `MPFRKMP_NATIVE_DIR` — directory containing the library;
  *  3. `System.loadLibrary("mpfr_kmp")` — packaged/embedded path.
+ *  4. Opt-in only: the checked-out build-dir layout (`library/native/build/…`)
+ *     resolved against the **process working directory**, enabled by
+ *     `-Dmpfrkmp.native.allowDevGuess=true`. Never attempted otherwise — a
+ *     working-dir-relative load is an untrusted-binary path for packaged use.
  *
  * Bundling the library per-platform inside the artifact (Maven classifiers / Android
  * `jniLibs`) is pending packaging work; the classpath-extraction path lands with it.
@@ -42,10 +46,24 @@ internal object MpfrNativeLoader {
                 try {
                     System.loadLibrary(LIBRARY_NAME)
                 } catch (first: UnsatisfiedLinkError) {
-                    // one more chance: the build-dir layout used in development (`library/native/build/…`)
-                    val guess = File(nativeBuildDirGuess(), platformFileName())
-                    if (!guess.isFile) throw first
-                    System.load(guess.absolutePath)
+                    // Development convenience only, and only when explicitly
+                    // requested: the build-dir layout, resolved relative to the
+                    // process working directory. Disabled by default so a
+                    // packaged JVM can never load a binary planted in its CWD.
+                    if (devGuessAllowed()) {
+                        val guess = File(nativeBuildDirGuess(), platformFileName())
+                        if (guess.isFile) {
+                            System.err.println(
+                                "mpfr-kmp: loading '$LIBRARY_NAME' from working-dir dev guess: " +
+                                    guess.absoluteFile,
+                            )
+                            System.load(guess.absolutePath)
+                        } else {
+                            throw first
+                        }
+                    } else {
+                        throw first
+                    }
                 }
                 ready = true
             } catch (e: MpfrLoadException) {
@@ -53,12 +71,18 @@ internal object MpfrNativeLoader {
             } catch (e: Throwable) {
                 throw MpfrLoadException(
                     "could not load native shim '$LIBRARY_NAME' (${platformFileName()}); " +
-                        "set -Dmpfrkmp.native.file or build it via library/native/jni/build-shim.sh",
+                        "set -Dmpfrkmp.native.file / -Dmpfrkmp.native.dir, or in a development " +
+                        "checkout -Dmpfrkmp.native.allowDevGuess=true " +
+                        "(shim: library/native/jni/build-shim.sh)",
                     e,
                 )
             }
         }
     }
+
+    private fun devGuessAllowed(): Boolean =
+        (System.getProperty("mpfrkmp.native.allowDevGuess") ?: System.getenv("MPFRKMP_NATIVE_ALLOW_DEV_GUESS"))
+            ?.equals("true", ignoreCase = true) == true
 
     private fun nativeBuildDirGuess(): File = File("library/native/build")
 
