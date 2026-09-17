@@ -1,0 +1,170 @@
+# Manual-dispatch verification of the shipped matrix (JVM + Android) against the
+# pinned MPFR/GMP sources. One job builds the native side exactly the way the
+# contributor docs prescribe (third_party/mpfr/build.sh + library/native/jni/
+# build-shim.sh); two dependent jobs then run the Gradle verification surface
+# with the real library loaded. No automatic triggers by design: later work adds
+# a hosted matrix once every target has its real implementation.
+name: Verification (manual dispatch)
+
+on:
+  workflow_dispatch
+
+permissions:
+  contents: read
+
+env:
+  MPFR_PREFIX: ${{ github.workspace }}/third_party/mpfr/install
+  SHIM_DIR: ${{ github.workspace }}/library/native/build
+
+jobs:
+  # Builds vendored MPFR/GMP + the JNI shim, then hands the tree to the test
+  # jobs as an artifact. The install tree is cached across dispatches; the shim
+  # is always recompiled (seconds) so native-code drift is caught cheaply.
+  native-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (jni.h for the shim)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Restore MPFR/GMP install tree cache
+        uses: actions/cache@v4
+        id: cache-mpfr
+        with:
+          path: third_party/mpfr/install
+          key: mpfr-install-linux-${{ hashFiles('third_party/mpfr/fetch.sh', 'third_party/mpfr/build.sh') }}
+
+      - name: Build pinned MPFR + GMP (fetch, configure, make, make check, install)
+        if: steps.cache-mpfr.outputs.cache-hit != 'true'
+        run: bash third_party/mpfr/build.sh
+
+      - name: Build JNI shim against the install tree
+        run: bash library/native/jni/build-shim.sh
+
+      - name: Publish native build outputs to the test jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-linux
+          path: |
+            third_party/mpfr/install
+            library/native/build
+          retention-days: 7
+
+  # The JVM tier with the real shared library loaded. The shim is resolved via
+  # MPFRKMP_NATIVE_DIR and libmpfr/libgmp via LD_LIBRARY_PATH; --no-daemon so
+  # the test JVM inherits this step's environment. Without this pairing the
+  # native smoke tests would assumption-skip and the suite would stay green —
+  # the count checks below exist exactly to prevent that silent degrade.
+  verify-jvm:
+    needs: native-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Restore native build outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: native-linux
+
+      - name: JVM tests, binary-compatibility check, source self-describing scan
+        run: >-
+          ./gradlew --no-daemon
+          :library:jvmTest
+          :examples:jvmTest
+          :library:apiCheck
+          :checkZeroExposure
+        env:
+          MPFRKMP_NATIVE_DIR: ${{ env.SHIM_DIR }}
+          LD_LIBRARY_PATH: ${{ env.MPFR_PREFIX }}/lib
+
+      - name: Verify the native tests genuinely executed
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob, sys, xml.etree.ElementTree as ET
+
+          def tally(directory):
+              tests = skipped = 0
+              for path in glob.glob(directory + "/TEST-*.xml"):
+                  root = ET.parse(path).getroot()
+                  tests += int(root.get("tests", "0"))
+                  skipped += int(root.get("skipped", "0"))
+              return tests, skipped
+
+          lib_tests, lib_skipped = tally("library/build/test-results/jvmTest")
+          ex_tests, ex_skipped = tally("examples/build/test-results/jvmTest")
+          print(f"library: {lib_tests} tests, {lib_skipped} skipped")
+          print(f"examples: {ex_tests} tests, {ex_skipped} skipped")
+          problems = []
+          if lib_skipped:
+              problems.append("library suite contains skipped tests — was the shim loaded?")
+          if lib_tests < 40:
+              problems.append(f"library suite ran {lib_tests} tests, expected at least 40")
+          if ex_tests < 10:
+              problems.append(f"examples suite ran {ex_tests} tests, expected at least 10")
+          if problems:
+              sys.exit("\n".join(problems))
+          PY
+
+  # Android tier at v0 means the host (JVM) unit-test surface plus compilation
+  # of the android sources; device runs need hardware and are not part of any
+  # manual verification job here.
+  verify-android:
+    needs: native-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Ensure Android platform for compileSdk
+        run: yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" || true
+
+      - name: Restore native build outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: native-linux
+
+      - name: Android host unit tests (compiles android sources, runs on JVM)
+        run: >-
+          ./gradlew --no-daemon
+          :library:testAndroidHostTest
+          :examples:testAndroidHostTest
+        env:
+          MPFRKMP_NATIVE_DIR: ${{ env.SHIM_DIR }}
+          LD_LIBRARY_PATH: ${{ env.MPFR_PREFIX }}/lib
+
+      - name: Android host-test result summary (report-only at first integration)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          for directory in ("library/build/test-results", "examples/build/test-results"):
+              tests = skipped = 0
+              for path in glob.glob(directory + "/**/TEST-*.xml", recursive=True):
+                  root = ET.parse(path).getroot()
+                  tests += int(root.get("tests", "0"))
+                  skipped += int(root.get("skipped", "0"))
+              print(f"{directory}: {tests} tests, {skipped} skipped")
+          PY
