@@ -155,16 +155,31 @@ jobs:
           MPFRKMP_NATIVE_DIR: ${{ env.SHIM_DIR }}
           LD_LIBRARY_PATH: ${{ env.MPFR_PREFIX }}/lib
 
-      - name: Android host-test result summary (report-only at first integration)
+      - name: Assert Android host tests genuinely executed
         shell: bash
         run: |
           python3 - <<'PY'
-          import glob, xml.etree.ElementTree as ET
-          for directory in ("library/build/test-results", "examples/build/test-results"):
+          import glob, sys, xml.etree.ElementTree as ET
+
+          def tally(directory):
               tests = skipped = 0
               for path in glob.glob(directory + "/**/TEST-*.xml", recursive=True):
                   root = ET.parse(path).getroot()
                   tests += int(root.get("tests", "0"))
                   skipped += int(root.get("skipped", "0"))
-              print(f"{directory}: {tests} tests, {skipped} skipped")
+              return tests, skipped
+
+          lib_tests, lib_skipped = tally("library/build/test-results")
+          ex_tests, ex_skipped = tally("examples/build/test-results")
+          print(f"library host: {lib_tests} tests, {lib_skipped} skipped")
+          print(f"examples host: {ex_tests} tests, {ex_skipped} skipped")
+          problems = []
+          if lib_skipped or ex_skipped:
+              problems.append("host suites contain skipped tests — was the shim loaded?")
+          if lib_tests < 29:
+              problems.append(f"library host suite ran {lib_tests} tests, expected at least 29")
+          if ex_tests < 9:
+              problems.append(f"examples host suite ran {ex_tests} tests, expected at least 9")
+          if problems:
+              sys.exit("\n".join(problems))
           PY
