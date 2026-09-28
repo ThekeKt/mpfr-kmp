@@ -19,15 +19,15 @@ object ShimTables {
     // binary — variables in scope: rop, x, y, r
     val binary = listOf(
         OpEntry(0, "ADD", "mpfr_add(rop, x, y, r)", "mpfr.h L580"),
-        OpEntry(1, "SUB", "mpfr_sub(rop, x, y, r)", "mpfr.h L583"),
-        OpEntry(2, "MUL", "mpfr_mul(rop, x, y, r)", "mpfr.h L585"),
-        OpEntry(3, "DIV", "mpfr_div(rop, x, y, r)", "mpfr.h L587"),
+        OpEntry(1, "SUB", "mpfr_sub(rop, x, y, r)", "mpfr.h L581"),
+        OpEntry(2, "MUL", "mpfr_mul(rop, x, y, r)", "mpfr.h L582"),
+        OpEntry(3, "DIV", "mpfr_div(rop, x, y, r)", "mpfr.h L583"),
         OpEntry(4, "POW", "mpfr_pow(rop, x, y, r)", "mpfr_pow"),
         // receiver is the ordinate (y-coordinate), argument the abscissa:
         // mpfr_atan2 takes (y, x) per the MPFR manual.
         OpEntry(5, "ATAN2", "mpfr_atan2(rop, x, y, r)", "mpfr.h L735"),
-        OpEntry(6, "MIN", "mpfr_min(rop, x, y, r)", "mpfr_min: NaN propagates verbatim"),
-        OpEntry(7, "MAX", "mpfr_max(rop, x, y, r)", "mpfr_max: NaN propagates verbatim"),
+        OpEntry(6, "MIN", "mpfr_min(rop, x, y, r)", "mpfr.h L787: if exactly one operand is NaN returns the non-NaN operand; NaN only if both are NaN (IEEE 754 minNum)"),
+        OpEntry(7, "MAX", "mpfr_max(rop, x, y, r)", "mpfr.h L788: if exactly one operand is NaN returns the non-NaN operand; NaN only if both are NaN (IEEE 754 maxNum)"),
         OpEntry(8, "DIM", "mpfr_dim(rop, x, y, r)", "mpfr_dim"),
         OpEntry(9, "HYPOT", "mpfr_hypot(rop, x, y, r)", "mpfr_hypot"),
         OpEntry(10, "AGM", "mpfr_agm(rop, x, y, r)", "mpfr_agm"),

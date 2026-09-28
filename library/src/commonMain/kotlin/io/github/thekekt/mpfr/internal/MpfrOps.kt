@@ -9,13 +9,13 @@ import io.github.thekekt.mpfr.InternalMpfrApi
 @InternalMpfrApi
 internal object MpfrBinaryOp {
     const val ADD: Int = 0 // mpfr.h L580 — mpfr_add(rop, x, y, r)
-    const val SUB: Int = 1 // mpfr.h L583 — mpfr_sub(rop, x, y, r)
-    const val MUL: Int = 2 // mpfr.h L585 — mpfr_mul(rop, x, y, r)
-    const val DIV: Int = 3 // mpfr.h L587 — mpfr_div(rop, x, y, r)
+    const val SUB: Int = 1 // mpfr.h L581 — mpfr_sub(rop, x, y, r)
+    const val MUL: Int = 2 // mpfr.h L582 — mpfr_mul(rop, x, y, r)
+    const val DIV: Int = 3 // mpfr.h L583 — mpfr_div(rop, x, y, r)
     const val POW: Int = 4 // mpfr_pow — mpfr_pow(rop, x, y, r)
     const val ATAN2: Int = 5 // mpfr.h L735 — mpfr_atan2(rop, x, y, r)
-    const val MIN: Int = 6 // mpfr_min: NaN propagates verbatim — mpfr_min(rop, x, y, r)
-    const val MAX: Int = 7 // mpfr_max: NaN propagates verbatim — mpfr_max(rop, x, y, r)
+    const val MIN: Int = 6 // mpfr.h L787: if exactly one operand is NaN returns the non-NaN operand; NaN only if both are NaN (IEEE 754 minNum) — mpfr_min(rop, x, y, r)
+    const val MAX: Int = 7 // mpfr.h L788: if exactly one operand is NaN returns the non-NaN operand; NaN only if both are NaN (IEEE 754 maxNum) — mpfr_max(rop, x, y, r)
     const val DIM: Int = 8 // mpfr_dim — mpfr_dim(rop, x, y, r)
     const val HYPOT: Int = 9 // mpfr_hypot — mpfr_hypot(rop, x, y, r)
     const val AGM: Int = 10 // mpfr_agm — mpfr_agm(rop, x, y, r)

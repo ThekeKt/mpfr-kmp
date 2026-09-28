@@ -27,17 +27,21 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 /**
  * An MPFR floating-point value: (kind, sign, precision, mantissa · 2^exponent)
  * held as the canonical [Repr] byte encoding — immutable, GC-clean, shareable
- * across threads. Every arithmetic op returns a new value and **never throws**
- * for arithmetic reasons; NaN / ±Inf / ±0 propagate exactly as MPFR computes
- * them.
+ * across threads. Every arithmetic operation returns a new value and never throws
+ * for arithmetic reasons; special values propagate as MPFR computes them, with one
+ * normalization: NaN is always sign-positive in this library. Exception: [dot]
+ * maps to an MPFR function documented as experimental that does not yet handle
+ * intermediate overflows/underflows — see the domain caveat on that function.
  *
  * Identity model: [equals] is structural — NaN never
  * equals NaN (even via `equals`), `+0 ≠ −0`, and same mantissa at different
  * precisions is a different value. [compareTo] is a **total order**, not
  * MPFR's partial order — [totalOrder] exposes the verbatim MPFR predicate.
  *
- * MPFR names are preserved at the API line (`add/sub/mul/div`, `sqrt`, `agm`,
- * `fma`, `dim`, `reciprocalSqrt` for `mpfr_rec_sqrt` — the single sanctioned rename).
+ * MPFR names are preserved on the API line where practical (`add/sub/mul/div`,
+ * `sqrt`, `agm`, `fma`, `dim`, …); Kotlin-idiomatic renames (e.g. `reciprocalSqrt`
+ * for `mpfr_rec_sqrt`, `nextUp`/`nextDown` for `mpfr_nextabove`/`mpfr_nextbelow`)
+ * are documented per function with the underlying MPFR name.
  */
 @OptIn(ExperimentalAtomicApi::class)
 public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: Repr) :
@@ -56,10 +60,11 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
     public val isZero: Boolean get() = kind == MpfrKind.ZERO
     public val isFinite: Boolean get() = !isNaN && !isInfinite
 
-    /** Sign bit; NaN reports `false` even for a NaN-repr (there is no negative NaN). */
+    /** Sign bit; always `false` for NaN: this library's canonical representation
+     *  normalizes NaN to sign-positive (MPFR itself permits a sign bit on NaN). */
     public val isNegative: Boolean get() = repr.signbit
 
-    /** [Sign.POSITIVE] for NaN — NaN never exposes a sign. */
+    /** [Sign.POSITIVE] for NaN — the canonical form has no negative NaN. */
     public val sign: Sign get() = if (repr.signbit && !isNaN) Sign.NEGATIVE else Sign.POSITIVE
 
     /** Mathematically-integer test, pure over the representation (mpfr_integer_p equivalent). */
@@ -117,13 +122,23 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
     /** `mpfr_lessgreater_p`: ordered and unequal. */
     public infix fun isLessOrGreater(other: MpfrFloat): Boolean = predicate(other, MpfrPredicateOp.LESS_GREATER)
 
-    /** `mpfr_total_order_p` verbatim (distinct from [compareTo]). */
+    /**
+     * `mpfr_total_order_p` verbatim (distinct from [compareTo]), with one library-level
+     * caveat: NaN values in this library never carry a negative sign, so the IEEE 754
+     * distinction −NaN < x < +NaN is not observable here — `totalOrder(NaN, NaN)` is
+     * `true` and NaN sorts above every non-NaN value. Comparison predicates never
+     * modify the exception flags.
+     */
     public infix fun totalOrder(other: MpfrFloat): Boolean = predicate(other, MpfrPredicateOp.TOTAL_ORDER)
 
     /**
-     * `mpfr_eq` — equal within [maxUlps] representable steps. Equal precisions and
-     * non-NaN operands are required (programmer error otherwise: MPFR leaves that
-     * case unspecified).
+     * `mpfr_eq`: true if both operands are non-zero regular numbers with the same
+     * exponent and the same first [maxUlps] significand bits, both zero (either sign),
+     * or both infinities of the same sign; false otherwise (including NaN). This is a
+     * leading-bits comparison, not a closeness test: e.g. the binary significands
+     * 1.011111 and 1.100000 are regarded as different for any [maxUlps] larger than 1
+     * (see the MPFR manual). [maxUlps] must be non-negative. This wrapper additionally
+     * restricts the call to equal precisions and non-NaN operands.
      */
     public fun equalUlps(other: MpfrFloat, maxUlps: Int): Boolean {
         require(!(isNaN || other.isNaN)) { "equalUlps is undefined for NaN operands" }
@@ -131,7 +146,15 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
         return MpfrBridge.eqUlps(repr, other.repr, maxUlps)
     }
 
-    /** `mpfr_reldiff(this, other)`: |other − this| / |this| — anchored to the manual line in the shim. */
+    /**
+     * `mpfr_reldiff(this, other)`: computes |this − other| / **this** — the denominator
+     * is the signed first operand, not its absolute value (MPFR manual). The result is
+     * not necessarily correctly rounded: it is a rounded subtraction followed by a
+     * rounded division, each with [rnd] at [resultPrecision], and the C function
+     * returns no ternary value. Yields NaN when `this` is NaN or ±Inf, when [other] is
+     * NaN, or when both are zero; yields ±Inf (sign of `this`) when `this` is ±0 with a
+     * nonzero [other], or when [other] is ±Inf.
+     */
     public fun relativeDifference(other: MpfrFloat, rnd: RoundingMode = RoundingMode.NEAREST_EVEN, resultPrecision: MpfrPrecision = maxOf(precision, other.precision)): MpfrFloat =
         MpfrFloat(MpfrBridge.binaryOp(repr, other.repr, resultPrecision.bits, rnd.mpfrValueU(), MpfrBinaryOp.RELDIFF))
 
@@ -179,7 +202,8 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
 
     // pure sign ops + unary family
 
-    /** Sign flip as pure Repr transform; NaN untouched (there is no negative NaN). */
+    /** Sign flip as pure Repr transform; NaN is returned unchanged — the canonical
+     *  form has no negative NaN. */
     public operator fun unaryMinus(): MpfrFloat = MpfrFloat(repr.flippedSign())
 
     /** `|x|`; `abs` of ±0 returns the **+0** variant (MPFR macro rule). */
@@ -236,10 +260,16 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
     public fun digamma(rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat = unary(MpfrUnaryOp.DIGAMMA, rnd)
     public fun zeta(rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat = unary(MpfrUnaryOp.ZETA, rnd)
 
-    /** Round toward zero to an integer value at this precision (`mpfr_trunc`). */
+    /** Round toward zero to an integer value at this precision (`mpfr_trunc`). The
+     *  [rnd] parameter is currently ignored: truncation direction is fixed by MPFR
+     *  (like `mpfr_rint` with round-toward-zero). */
     public fun truncate(rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat = unary(MpfrUnaryOp.TRUNC, rnd)
 
-    /** Floor/ceil/round are directionally exact — no rounding parameter (mpfr.h L474–L477). */
+    /** `mpfr_floor`/`mpfr_ceil`/`mpfr_round`: rounding toward −∞/+∞/nearest-ties-away
+     *  with a fixed direction, so no rounding parameter is exposed (in C they are
+     *  macros over `mpfr_rint`). Since the result keeps this value's precision, the
+     *  rounded integer is always exactly representable here (the MPFR manual permits
+     *  inexact results only when the destination precision is smaller). */
     public fun floor(): MpfrFloat = unary(MpfrUnaryOp.FLOOR, RoundingMode.NEAREST_EVEN)
     public fun ceil(): MpfrFloat = unary(MpfrUnaryOp.CEIL, RoundingMode.NEAREST_EVEN)
 
@@ -261,11 +291,15 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
         return SinCosResult(MpfrFloat(parts[0]), MpfrFloat(parts[1]))
     }
 
-    /** `mpfr_min` verbatim — NaN if either operand is NaN (MPFR macro semantics). */
+    /** `mpfr_min` verbatim: if exactly one operand is NaN, the other (non-NaN) operand
+     *  is returned (like IEEE 754 `minNum`); NaN is returned only when both operands are
+     *  NaN; `min(−0, +0)` is `−0`. */
     public fun min(other: MpfrFloat, rnd: RoundingMode = RoundingMode.NEAREST_EVEN, resultPrecision: MpfrPrecision = maxOf(precision, other.precision)): MpfrFloat =
         MpfrFloat(MpfrBridge.binaryOp(repr, other.repr, resultPrecision.bits, rnd.mpfrValueU(), MpfrBinaryOp.MIN))
 
-    /** `mpfr_max` verbatim — NaN if either operand is NaN (MPFR macro semantics). */
+    /** `mpfr_max` verbatim: if exactly one operand is NaN, the other (non-NaN) operand
+     *  is returned (like IEEE 754 `maxNum`); NaN is returned only when both operands are
+     *  NaN; `max(−0, +0)` is `+0`. */
     public fun max(other: MpfrFloat, rnd: RoundingMode = RoundingMode.NEAREST_EVEN, resultPrecision: MpfrPrecision = maxOf(precision, other.precision)): MpfrFloat =
         MpfrFloat(MpfrBridge.binaryOp(repr, other.repr, resultPrecision.bits, rnd.mpfrValueU(), MpfrBinaryOp.MAX))
 
@@ -320,7 +354,19 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
 
     // ---- conversions ------------------------------------------------------------------
 
+    /**
+     * Converts with `mpfr_get_d` rounding. Out-of-range values saturate: on overflow
+     * the result is ±Inf, or ±`Double.MAX_VALUE` when [rnd] rounds toward zero or away
+     * from the overflow direction; on underflow it is ±0 or the smallest double
+     * subnormal. No range exception is
+     * thrown and no `ERANGE` flag is raised by this conversion (unlike the integer
+     * narrowings below) — detect saturation via `Double.isInfinite`, or use
+     * [fitsLong]/[fitsInt] for integer conversions.
+     */
     public fun toDouble(rnd: RoundingMode = RoundingMode.NEAREST_EVEN): Double = MpfrBridge.toDouble(repr, rnd.mpfrValueU())
+
+    /** [toDouble] semantics for `Float` (`mpfr_get_flt`): saturates, never throws,
+     *  raises no `ERANGE`. */
     public fun toFloat(rnd: RoundingMode = RoundingMode.NEAREST_EVEN): Float = MpfrBridge.toFloat(repr, rnd.mpfrValueU())
 
     public fun toLong(rnd: RoundingMode = RoundingMode.NEAREST_EVEN): Long {
@@ -340,10 +386,15 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
 
     // ---- strings (specials match Double.toString labels) --------------------------------
 
-    /** Full round-trip decimal — MPFR-chosen width (mpfr.h L537: `n=0` ⇒ exact round-trip). */
+    /** Full round-trip decimal: with `digits = 0` MPFR emits
+     *  `mpfr_get_str_ndigits(10, precision)` digits — enough that re-reading the string
+     *  at the same precision and rounding mode recovers the value exactly (MPFR manual,
+     *  `mpfr_get_str`). */
     override fun toString(): String = toString(digits = 0, rnd = RoundingMode.NEAREST_EVEN)
 
-    /** Decimal at [digits] significant digits; [digits] 0 → MPFR-chosen shortest. */
+    /** Decimal at [digits] significant digits; [digits] 0 → MPFR-chosen width:
+     *  `mpfr_get_str_ndigits(base, precision)` significant digits (round-trip-safe,
+     *  not necessarily the shortest representation). */
     public fun toString(digits: Int, rnd: RoundingMode = RoundingMode.NEAREST_EVEN): String {
         when (kind) {
             MpfrKind.NAN -> return "NaN"
@@ -454,7 +505,8 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
         public fun E(precision: MpfrPrecision = defaultPrecision, rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat =
             MpfrFloat(MpfrBridge.constOp(precision.bits, rnd.mpfrValueU(), MpfrConstOp.E))
 
-        /** `mpfr_fac_ui(n!)`. */
+        /** `mpfr_fac_ui(n!)`. The [rnd] parameter is currently ignored: the native
+         *  bridge rounds to nearest even (`MPFR_RNDN`). */
         public fun factorial(n: Long, precision: MpfrPrecision = defaultPrecision, rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat {
             require(n >= 0) { "factorial argument must be >= 0, was $n" }
             return MpfrFloat(MpfrBridge.factorial(n, precision.bits, rnd.mpfrValueU()))
@@ -473,13 +525,16 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
         }
 
         /**
-         * `mpfr_dot`.
+         * `mpfr_dot` — correctly-rounded dot product (the exact series is accumulated
+         * and rounded once, in the direction [rnd]). MPFR documents this function as
+         * experimental: intermediate overflows and underflows of the pairwise products
+         * are not handled upstream.
          *
          * Domain deviation: throws [IllegalArgumentException] when the exact product of a
          * regular×regular pair would leave the MPFR exponent range (intermediate overflow or
-         * underflow) — upstream `mpfr_dot` does not yet handle intermediate over/underflows,
-         * and the wrapper rejects such domains instead of risking the process. Pairs with a
-         * special element (NaN/±Inf/±0) multiply exactly and are never restricted.
+         * underflow) — the wrapper rejects such domains instead of risking the process.
+         * Pairs with a special element (NaN/±Inf/±0) multiply exactly and are never
+         * restricted.
          */
         public fun dot(a: List<MpfrFloat>, b: List<MpfrFloat>, precision: MpfrPrecision = (a + b).widestPrecision(defaultPrecision), rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat {
             require(a.isNotEmpty() && a.size == b.size) { "dot() needs two non-empty lists of equal size" }
@@ -488,7 +543,9 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
 
         /**
          * `mpfr_strtofr` wrapper: one `parse`, `Result`-typed, no `endPtr`.
-         * [base] = 0 → MPFR auto-detect (`0x`, `0b`, leading-0 octal);
+         * [base] = 0 → MPFR auto-detect: a leading `0b`/`0B` selects base 2, a leading
+         * `0x`/`0X` selects base 16, otherwise base 10 is assumed (unlike C `strtod`, a
+         * leading `0` does not select octal);
          * bases outside `[0, 2..62]` fail as [MpfrParseError.UnsupportedBase].
          * `NaN`/`inf`/`-inf` literals parse to the specials.
          */

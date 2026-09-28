@@ -33,7 +33,9 @@ public enum class RoundingMode {
     @InternalMpfrApi
     internal val mpfrValue: Int get() = ordinal
 
-    /** MPFR's short label (`"N"`, `"Z"`, `"U"`, `"D"`, `"A"` — `mpfr_print_rnd_mode`). */
+    /** This library's short label (`"N"`, `"Z"`, `"U"`, `"D"`, `"A"`) — one letter per
+     *  mode, matching the initial of each `MPFR_RND*` constant (`mpfr_print_rnd_mode`
+     *  prints the full constant names, not these). */
     override fun toString(): String = when (this) {
         NEAREST_EVEN -> "N"
         TOWARD_ZERO -> "Z"

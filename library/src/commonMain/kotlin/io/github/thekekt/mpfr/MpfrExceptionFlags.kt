@@ -109,8 +109,9 @@ public class MpfrExceptionFlags private constructor(internal val bits: Int) {
         public fun current(): MpfrExceptionFlags = MpfrExceptionFlags(MpfrBridge.flagsGet().toInt())
 
         /**
-         * Bulk query against the **global set**: `(current() and mask)` via
-         * `mpfr_flags_test`.
+         * Bulk query against the **global set**: the intersection of [current] with
+         * [mask] (the same value `mpfr_flags_test(mask)` returns, computed from the
+         * flag bits).
          */
         public fun test(mask: MpfrFlagsMask): MpfrExceptionFlags =
             MpfrExceptionFlags(current().bits and mask.bits)
@@ -136,7 +137,13 @@ public value class MpfrFlagsSnapshot @InternalMpfrApi internal constructor(priva
     @InternalMpfrApi
     internal val mpfrBits: UInt get() = raw
 
-    /** Writes the saved state back to the global set, then clears [clear]'s bits. */
+    /**
+     * Restores, from the saved state, exactly the flags selected by [clear]
+     * (`mpfr_flags_restore(saved, mask)` semantics: only the mask's bits are written
+     * back); all other current flags are left untouched. Note: with the default empty
+     * mask this call changes nothing — pass [MpfrFlagsMask.ALL] to write the full
+     * saved state back.
+     */
     public fun restore(clear: MpfrFlagsMask = MpfrFlagsMask.NONE): Unit =
         MpfrBridge.flagsRestore(raw, clear.bits.toUInt())
 }

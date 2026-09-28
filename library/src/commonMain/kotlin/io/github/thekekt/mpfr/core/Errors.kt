@@ -7,18 +7,19 @@ package io.github.thekekt.mpfr.core
 public interface MpfrError
 
 /**
- * Expected parse failure. The three variants map the
- * `mpfr_strtofr` status codes: -1 → [MalformedInput], -2 → [UnsupportedBase],
+ * Expected parse failure. The three variants map this library's parse status codes,
+ * derived from `mpfr_strtofr`'s end-pointer and the base pre-check (the C function
+ * itself returns the usual ternary value): -1 → [MalformedInput], -2 → [UnsupportedBase],
  * -3 → [ExponentSyntax]; status 0 never produces an error value.
  */
 public sealed interface MpfrParseError : MpfrError {
-    /** Malformed or empty input (MPFR status -1). */
+    /** Malformed or empty input (library status -1). */
     public data object MalformedInput : MpfrParseError
 
-    /** `base` outside the MPFR-supported range [2, 62] (MPFR status -2). */
+    /** `base` outside the MPFR-supported range [2, 62] (library status -2). */
     public data object UnsupportedBase : MpfrParseError
 
-    /** Exponent-part syntax error (MPFR status -3). */
+    /** Exponent-part syntax error (library status -3). */
     public data object ExponentSyntax : MpfrParseError
 }
 

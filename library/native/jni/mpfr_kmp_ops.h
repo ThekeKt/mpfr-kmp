@@ -116,13 +116,13 @@
 /* --- citations, one entry per op (documentation only) --------------------------- */
 #define KMP_BINARY_CITES(X) \
     X(ADD 0 /* mpfr.h L580 */) \
-    X(SUB 1 /* mpfr.h L583 */) \
-    X(MUL 2 /* mpfr.h L585 */) \
-    X(DIV 3 /* mpfr.h L587 */) \
+    X(SUB 1 /* mpfr.h L581 */) \
+    X(MUL 2 /* mpfr.h L582 */) \
+    X(DIV 3 /* mpfr.h L583 */) \
     X(POW 4 /* mpfr_pow */) \
     X(ATAN2 5 /* mpfr.h L735 */) \
-    X(MIN 6 /* mpfr_min: NaN propagates verbatim */) \
-    X(MAX 7 /* mpfr_max: NaN propagates verbatim */) \
+    X(MIN 6 /* mpfr.h L787: if exactly one operand is NaN returns the non-NaN operand; NaN only if both are NaN (IEEE 754 minNum) */) \
+    X(MAX 7 /* mpfr.h L788: if exactly one operand is NaN returns the non-NaN operand; NaN only if both are NaN (IEEE 754 maxNum) */) \
     X(DIM 8 /* mpfr_dim */) \
     X(HYPOT 9 /* mpfr_hypot */) \
     X(AGM 10 /* mpfr_agm */) \

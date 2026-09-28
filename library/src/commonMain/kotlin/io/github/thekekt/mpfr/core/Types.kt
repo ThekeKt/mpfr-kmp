@@ -2,8 +2,10 @@ package io.github.thekekt.mpfr.core
 
 /**
  * Sign of a regular, zero or infinite value.
- * NaN never exposes a sign — [io.github.thekekt.mpfr.MpfrFloat.sign] reports
- * [POSITIVE] for NaN and the sign predicate returns `false`.
+ * In this library NaN never exposes a sign: the canonical representation normalizes
+ * NaN to sign-positive, so [io.github.thekekt.mpfr.MpfrFloat.sign] reports
+ * [POSITIVE] for NaN and the sign predicate returns `false`. (MPFR itself permits a
+ * sign bit on NaN; it is not preserved across the boundary.)
  */
 public enum class Sign {
     POSITIVE,
