@@ -24,6 +24,12 @@ libraries on every target; the compliance summary below records the obligations.
 - Copyright: Free Software Foundation, Inc.; the MPFR team (Guillaume Hanrot,
   Vincent Lefèvre, Patrick Pélissier, Philippe Théveny, Paul Zimmermann, and
   contributors). See `third_party/mpfr/src/AUTHORS`.
+- **Derived test vectors**: the reference-vector fixtures under
+  `library/src/jvmTest/resources/golden/` are machine-generated facts (input
+  and output values, precision, and exception flags) captured from this pinned
+  build by `library/native/golden/golden_capture.c`. They contain no upstream
+  source text; the fixtures and the capture harness are distributed under the
+  same terms as the Kotlin/Java wrapper code (`LICENSE`).
 
 ---
 

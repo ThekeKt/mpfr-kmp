@@ -54,7 +54,7 @@ object ExposurePatterns {
         "library/*.gradle.kts",
         "library/api/**",
         "library/src/**",
-        "library/native/jni/**",
+        "library/native/**",
         "examples/*.gradle.kts",
         "examples/src/**",
         "third_party/mpfr/*.md",
