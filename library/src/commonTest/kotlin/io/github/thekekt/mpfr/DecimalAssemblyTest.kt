@@ -43,5 +43,9 @@ class DecimalAssemblyTest {
         assertTrue(roundTripDecimalDigits(53) >= 17)
         assertTrue(roundTripDecimalDigits(1) >= 1)
         assertTrue(roundTripDecimalDigits(128) > 38)
+        // exact values of ceil(bits·log10 2) + 1 keep the true constant pinned
+        assertEquals(17, roundTripDecimalDigits(53))
+        assertEquals(32, roundTripDecimalDigits(100))
+        assertEquals(40, roundTripDecimalDigits(128))
     }
 }

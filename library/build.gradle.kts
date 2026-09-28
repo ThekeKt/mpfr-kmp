@@ -24,6 +24,11 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
+        // The property-test tier runs on Kotest, which rides the JUnit Platform;
+        // the kotlin-test variant resolves accordingly.
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
     }
     android {
         namespace = "io.github.thekekt.mpfrkmp"
@@ -57,6 +62,13 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.kotest.runner.junit5)
+            implementation(libs.kotest.property)
+            implementation(libs.kotest.assertions.core)
+            implementation(libs.junit.jupiter)
         }
     }
 }
