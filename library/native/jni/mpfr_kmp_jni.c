@@ -19,6 +19,13 @@
  * status codes (0 ok, -1 malformed, -2 bad base (pre-checked), -3 exponent-
  * marker garbage); the deviation from raw MPFR status is deliberate.
  */
+/* uselocale/newlocale (POSIX.1-2008, per-thread locale pin) are hidden behind
+   feature macros under -std=c11 on glibc/bionic — request them before any
+   include. Must stay the first statement of the file. */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include <jni.h>
 #include <stdint.h> /* intmax_t/uintmax_t before mpfr.h (mpfr.h L195-210) — enables the _sj/_uj block */
 #include <mpfr.h>
@@ -27,6 +34,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* Per-thread C numeric locale pin for the string-conversion regions
+   (strtofr/format). MPFR reads the decimal point through localeconv() on every
+   call (mpfr-impl.h: MPFR_DECIMAL_POINT), so a host application switching
+   LC_NUMERIC would otherwise change parse/format behaviour ("1,5" instead of
+   "1.5"). uselocale is per-thread: the host process's global locale state is
+   never touched and native code on other threads is unaffected. Both shipping
+   targets (Linux, Android/bionic) provide POSIX.1-2008 newlocale/uselocale. */
+#if defined(__linux__) || defined(__APPLE__)
+#include <locale.h>
+static __thread locale_t kmp_c_locale = (locale_t)0;
+
+static locale_t kmp_pin_c_locale(void) {
+    locale_t prev;
+    if (kmp_c_locale == (locale_t)0) {
+        kmp_c_locale = newlocale(LC_NUMERIC_MASK, "C", (locale_t)0);
+        if (kmp_c_locale == (locale_t)0) return (locale_t)0; /* allocation failed: keep the ambient locale */
+    }
+    prev = uselocale(kmp_c_locale);
+    return prev; /* may legitimately be LC_GLOBAL_LOCALE */
+}
+static void kmp_unpin_c_locale(locale_t prev) {
+    if (prev != (locale_t)0) uselocale(prev);
+}
+#define KMP_LOCALE_PIN_DECL() locale_t kmp_prev_loc_ = kmp_pin_c_locale()
+#define KMP_LOCALE_UNPIN() kmp_unpin_c_locale(kmp_prev_loc_)
+#else
+/* Non-POSIX hosts (e.g. a future Windows shim): a per-thread pin would use
+   _configthreadlocale() + setlocale(LC_NUMERIC, "C") here. Deliberately not
+   implemented — this file is only built for POSIX hosts today. */
+#define KMP_LOCALE_PIN_DECL() ((void)0)
+#define KMP_LOCALE_UNPIN() ((void)0)
+#endif
 
 #include "mpfr_kmp_ops.h"
 
@@ -59,8 +99,10 @@ static pthread_mutex_t kmp_lock = PTHREAD_MUTEX_INITIALIZER;
     do {                                          \
         /* restore every flag bit to its pre-op state (manual 3919-3922:
            second arg = mask of bits to restore — must be ALL here);
-           the op's delta, if any, is thereby discarded. */ \
-        mpfr_flags_restore(kmp_saved_, MPFR_FLAGS_ALL); \
+           the op's delta, if any, is thereby discarded. The saved snapshot is
+           masked to the defined flag bits so foreign high bits can never be
+           restored into the global set (defense in depth). */ \
+        mpfr_flags_restore(kmp_saved_ & MPFR_FLAGS_ALL, MPFR_FLAGS_ALL); \
         pthread_mutex_unlock(&kmp_lock);          \
     } while (0)
 
@@ -1110,6 +1152,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_thekekt_mpfr_internal_MpfrJni_strtof
         char* ep = NULL;
         int rc;
         int st = -1;
+        KMP_LOCALE_PIN_DECL(); /* decimal point must be '.' regardless of the host LC_NUMERIC */
         mpfr_init2(rop, (mpfr_prec_t)prec);
         /* 4.2.1 returns the usual ternary; validity/exponent-marker translate into
            the wrapper's codes: -1 no valid start, -2 base out of range
@@ -1138,6 +1181,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_thekekt_mpfr_internal_MpfrJni_strtof
             if (ps) { ps[0] = (jint)st; (*env)->ReleasePrimitiveArrayCritical(env, status, ps, 0); }
         }
         mpfr_clear(rop);
+        KMP_LOCALE_UNPIN();
     }
     KMP_REGION_END();
     (*env)->ReleaseStringUTFChars(env, s, cs);
@@ -1169,6 +1213,7 @@ JNIEXPORT jstring JNICALL Java_io_github_thekekt_mpfr_internal_MpfrJni_formatOp(
         char fmt[16];
         char* buf = NULL;
         int need;
+        KMP_LOCALE_PIN_DECL(); /* the %Rf/%Rg decimal point must stay '.' */
         kmp_init_decode(x, pa);
         if (digits > 0) {
             snprintf(fmt, sizeof fmt, "%%.*R%c", letter);
@@ -1185,6 +1230,7 @@ JNIEXPORT jstring JNICALL Java_io_github_thekekt_mpfr_internal_MpfrJni_formatOp(
         }
         if (buf) mpfr_free_str(buf);
         mpfr_clear(x);
+        KMP_LOCALE_UNPIN();
     }
     KMP_REGION_END();
     kmp_unload(env, a, pa);

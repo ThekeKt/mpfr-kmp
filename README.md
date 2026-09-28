@@ -13,3 +13,11 @@ flags, decimal/hex parsing, BigInteger crossings, a generated JNI shim) lives in
 - Licensing (Apache-2.0 wrapper; LGPL-3.0 MPFR/GMP, dynamically linked):
   [`LICENSE`](LICENSE), [`NOTICE`](NOTICE), [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md)
 - MPFR reference manual: <https://www.mpfr.org/mpfr-current/mpfr.html>
+
+## Parse/format locale independence
+
+`MpfrFloat.parse`, `toString` and `format` always use `.` as the decimal
+separator, regardless of the host process's locale settings. The native bridge
+pins a per-thread C numeric locale around each conversion (`uselocale`,
+POSIX.1-2008) and restores the thread's previous locale afterwards; the host
+application's global locale state is never modified.

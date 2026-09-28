@@ -409,7 +409,9 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
         return parsed.toDecimalString()
     }
 
-    /** `mpfr_snprintf` `%R` family (style selects e/f/g; digits=0 → MPFR default). */
+    /** `mpfr_snprintf` `%R` family (style selects e/f/g; digits=0 → MPFR default).
+     *  The decimal point is always `.` (per-thread C-locale pin in the native bridge;
+     *  host locale settings never leak in). */
     public fun format(style: NumberStyle = NumberStyle.GENERAL, digits: Int = 0, rnd: RoundingMode = RoundingMode.NEAREST_EVEN): String =
         MpfrBridge.format(repr, style.mpfrFormatOp(), digits, rnd.mpfrValueU())
 
@@ -548,6 +550,9 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
          * leading `0` does not select octal);
          * bases outside `[0, 2..62]` fail as [MpfrParseError.UnsupportedBase].
          * `NaN`/`inf`/`-inf` literals parse to the specials.
+         * The decimal point is always `.`: the native bridge pins a per-thread C
+         * numeric locale around the conversion, so host-process locale settings
+         * never affect parsing.
          */
         public fun parse(
             source: String,
