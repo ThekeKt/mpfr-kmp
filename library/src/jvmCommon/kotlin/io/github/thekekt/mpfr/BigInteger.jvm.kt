@@ -28,8 +28,13 @@ public fun MpfrFloat.toBigInteger(rnd: RoundingMode = RoundingMode.NEAREST_EVEN)
 
 /** Big-endian unsigned magnitude without leading zeros (GMP `mpz` convention). */
 private fun BigInteger.magnitudeBE(): ByteArray {
-    val raw = toByteArray() // sign byte first, then magnitude, two's complement
-    var from = 1
-    while (from < raw.size && raw[from] == 0.toByte()) from++
+    // The sign byte of a two's-complement array is absent for single-byte
+    // values (1..127 encode as [0x7f] etc., and negatives as [0x80]..[0xff]),
+    // so extract the magnitude from the absolute value instead of skipping a
+    // fixed leading byte.
+    val raw = abs().toByteArray()
+    if (raw.size == 1 && raw[0] == 0.toByte()) return ByteArray(0)
+    var from = 0
+    while (from < raw.size - 1 && raw[from] == 0.toByte()) from++
     return raw.copyOfRange(from, raw.size)
 }
