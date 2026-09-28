@@ -46,6 +46,29 @@ jobs:
       - name: Build JNI shim against the install tree
         run: bash library/native/jni/build-shim.sh
 
+      # The committed reference vectors must be byte-reproducible from the pinned
+      # build: recompile the capture harness and byte-diff its output against the
+      # checked-in fixtures. Any drift (pin bump, harness change, stale fixtures)
+      # fails the job immediately.
+      - name: Re-capture reference vectors and verify reproducibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcc -O2 -Wall -I third_party/mpfr/install/include \
+              library/native/golden/golden_capture.c \
+              -o "$RUNNER_TEMP/golden_capture" \
+              -L third_party/mpfr/install/lib -lmpfr -lgmp
+          mkdir -p "$RUNNER_TEMP/golden-recapture"
+          LD_LIBRARY_PATH=third_party/mpfr/install/lib \
+              "$RUNNER_TEMP/golden_capture" "$RUNNER_TEMP/golden-recapture"
+          if ! diff -r -u "$RUNNER_TEMP/golden-recapture" library/src/jvmTest/resources/golden \
+                  > "$RUNNER_TEMP/golden-diff.txt"; then
+            echo "::error::reference-vector re-capture differs from the committed fixtures"
+            head -200 "$RUNNER_TEMP/golden-diff.txt"
+            exit 1
+          fi
+          echo "reference-vector re-capture is byte-identical to the committed fixtures"
+
       - name: Publish native build outputs to the test jobs
         uses: actions/upload-artifact@v4
         with:
@@ -112,8 +135,8 @@ jobs:
           problems = []
           if lib_skipped:
               problems.append("library suite contains skipped tests — was the shim loaded?")
-          if lib_tests < 40:
-              problems.append(f"library suite ran {lib_tests} tests, expected at least 40")
+          if lib_tests < 107:
+              problems.append(f"library suite ran {lib_tests} tests, expected at least 107")
           if ex_tests < 10:
               problems.append(f"examples suite ran {ex_tests} tests, expected at least 10")
           if problems:
