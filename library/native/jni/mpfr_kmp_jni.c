@@ -99,6 +99,22 @@ static int kmp_validate(JNIEnv* env, const jbyte* p, jsize n) {
         for (i = 6; i < HDR; i++) if (p[i] != 0) goto bad; /* exp/len zero for specials */
     }
     if (p[0] == KIND_NAN && p[1] != 0) goto bad; /* NaN carries no sign */
+    if (p[0] == KIND_REG) {
+        /* Canonical exponent band. The encoder emits exp = E - bitlen - pad, where
+           E is the MPFR value exponent of a regular result (emin <= E <= emax:
+           MPFR has no gradual subnormals and the largest finite value stays below
+           2^emax), bitlen is the significand width (1 <= bitlen <= prec), and
+           pad in [0,7] is the byte-alignment shift. Hence a canonical REGULAR
+           always satisfies emin - prec - 7 <= exp <= emax - 1; the one-bit margin
+           below keeps the bound exact. An out-of-band exp can never come from the
+           encoder, and decoding one would silently change the kind
+           (mpfr_set_z_2exp maps it to +/-Inf or zero), so reject it here —
+           every op family is thereby protected from kind-corrupted operands. */
+        int64_t exp;
+        r64((const uint8_t*)p + 6, &exp);
+        if (exp > (int64_t)mpfr_get_emax()) goto bad;
+        if (exp < (int64_t)mpfr_get_emin() - (int64_t)pr - 8) goto bad;
+    }
     return 0;
 bad:
     (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalArgumentException"),
@@ -552,6 +568,90 @@ static void kmp_free_list(mpfr_t* backing, mpfr_ptr* tab, jsize n) {
     free(tab);
 }
 
+/* Domain guard for mpfr_dot.
+
+   Upstream computes each pair product exactly into a temporary of width
+   prec_a + prec_b and requires that multiply to be exact (mpfr_dot: "does not
+   yet handle intermediate overflows and underflows" — an intermediate
+   over/underflow trips an assertion and, in assertion-enabled builds, aborts
+   the process). The wrapper turns that abort into a typed exception by
+   pre-checking the exponent domain of every REGULAR x REGULAR pair:
+
+     the exact product has magnitude in [2^(ea+eb-2), 2^(ea+eb)) and is exact at
+     width prec_a + prec_b (its significand fits); the multiply is inexact only
+     on range violations. MPFR has no gradual subnormals — the smallest positive
+     value is 2^(emin-1) — and the largest finite one stays below 2^emax, so
+     every product is representable exactly iff  emin + 1 <= ea + eb <= emax.
+
+   The bounds are exact: just inside them no pair can abort, just outside them
+   an aborting pair exists. Pairs with a special element (NaN/Inf/zero)
+   multiply exactly into a special and never trip the assertion, so they are
+   skipped. */
+static int kmp_check_dot_domain(JNIEnv* env, const mpfr_ptr* ta, const mpfr_ptr* tb, jsize n) {
+    int64_t emax = (int64_t)mpfr_get_emax();
+    int64_t emin = (int64_t)mpfr_get_emin();
+    jsize i;
+    for (i = 0; i < n; i++) {
+        int64_t ea, eb, s;
+        if (!mpfr_regular_p(ta[i]) || !mpfr_regular_p(tb[i])) continue;
+        ea = (int64_t)mpfr_get_exp(ta[i]);
+        eb = (int64_t)mpfr_get_exp(tb[i]);
+        /* saturating add: decoded exponents sit inside [emin, emax + 1],
+           but a host-adjusted exponent range could make ea + eb wrap int64 */
+        if (ea > 0 && eb > INT64_MAX - ea) s = INT64_MAX;
+        else if (ea < 0 && eb < INT64_MIN - ea) s = INT64_MIN;
+        else s = ea + eb;
+        if (s > emax) goto bad;       /* intermediate overflow  */
+        if (s < emin + 1) goto bad;   /* intermediate underflow */
+    }
+    return 0;
+bad:
+    (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalArgumentException"),
+                     "mpfr_dot: an intermediate pair product leaves the MPFR exponent "
+                     "range (upstream mpfr_dot does not yet handle intermediate "
+                     "overflows/underflows)");
+    return -1;
+}
+
+/* Portability guard for the mpfr_sum accumulator algorithm (n >= 3; upstream
+   delegates smaller sums to mpfr_set/mpfr_add, which handle the full range via
+   the usual check_range path). The accumulator shifting in upstream sum
+   requires block exponents E >= MPFR_EXP_MIN + shift, where MPFR_EXP_MIN is
+   the bottom of the C exponent TYPE and the shift is bounded by the
+   accumulator width wq. We reconstruct the same wq the upstream sizing uses
+   (logn = ceil(log2(rn)), cq = logn + 1, ws = limbs(cq + prec + logn + 2),
+   wq = ws * GMP_NUMB_BITS) and require every REGULAR element exponent to sit
+   above MPFR_EXP_MIN + wq + slack. With a 64-bit mpfr_exp_t (all current
+   shipping targets) any decoded value trivially satisfies this; the check
+   becomes live only on a hypothetical narrow-exponent build, where the
+   upstream assertion would otherwise abort the process. */
+static int kmp_check_sum_domain(JNIEnv* env, const mpfr_ptr* tab, jsize n, mpfr_prec_t prec) {
+    const int64_t exp_type_min = -(int64_t)__MPFR_EXP_MAX - 1;
+    unsigned long rn = 0;
+    int logn = 0;
+    mpfr_prec_t cq, wq;
+    unsigned long ws;
+    int64_t floor_exp;
+    jsize i;
+    for (i = 0; i < n; i++) if (mpfr_regular_p(tab[i])) rn++;
+    if (rn < 3) return 0; /* upstream delegates: fewer than 3 regulars never reach the accumulator */
+    while ((1UL << logn) < rn) logn++;
+    cq = (mpfr_prec_t)logn + 1;
+    ws = (unsigned long)((cq + prec + (mpfr_prec_t)logn + 2 + GMP_NUMB_BITS - 1) / GMP_NUMB_BITS);
+    wq = (mpfr_prec_t)ws * GMP_NUMB_BITS;
+    floor_exp = exp_type_min + (int64_t)wq + 64;
+    for (i = 0; i < n; i++) {
+        if (!mpfr_regular_p(tab[i])) continue;
+        if ((int64_t)mpfr_get_exp(tab[i]) < floor_exp) {
+            (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalArgumentException"),
+                             "mpfr_sum: an element exponent is too close to the bottom of the "
+                             "exponent type for the upstream accumulator algorithm");
+            return -1;
+        }
+    }
+    return 0;
+}
+
 JNIEXPORT jbyteArray JNICALL Java_io_github_thekekt_mpfr_internal_MpfrJni_sumOp(
     JNIEnv* env, jobject self, jobjectArray items, jint prec, jint rnd) {
     mpfr_t* backing = NULL;
@@ -560,6 +660,10 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_thekekt_mpfr_internal_MpfrJni_sumOp(
     jbyteArray out = NULL;
     (void)self;
     if (kmp_decode_list(env, items, &backing, &tab, &n) < 0) return NULL;
+    if (kmp_check_sum_domain(env, (const mpfr_ptr*)tab, n, (mpfr_prec_t)prec) < 0) {
+        kmp_free_list(backing, tab, n);
+        return NULL;
+    }
     KMP_REGION_BEGIN();
     KMP_FLAGS_SAVED_DECL();
     {
@@ -588,6 +692,11 @@ JNIEXPORT jbyteArray JNICALL Java_io_github_thekekt_mpfr_internal_MpfrJni_dotOp(
     }
     if (na != nb) {
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalArgumentException"), "dot: unequal list sizes");
+        kmp_free_list(ba, ta, na);
+        kmp_free_list(bb, tb, nb);
+        return NULL;
+    }
+    if (kmp_check_dot_domain(env, (const mpfr_ptr*)ta, (const mpfr_ptr*)tb, na) < 0) {
         kmp_free_list(ba, ta, na);
         kmp_free_list(bb, tb, nb);
         return NULL;

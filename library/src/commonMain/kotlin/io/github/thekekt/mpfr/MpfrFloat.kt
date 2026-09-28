@@ -460,13 +460,27 @@ public class MpfrFloat private constructor(@InternalMpfrApi internal val repr: R
             return MpfrFloat(MpfrBridge.factorial(n, precision.bits, rnd.mpfrValueU()))
         }
 
-        /** `mpfr_sum` — correctly-rounded sum of all items (single rounding of the series). */
+        /**
+         * `mpfr_sum` — correctly-rounded sum of all items (single rounding of the series).
+         *
+         * Lists with fewer than three regular elements are delegated to `mpfr_set`/`mpfr_add`
+         * by MPFR itself (and therefore follow the ordinary range-checking behaviour);
+         * no exponent-domain restriction applies to values produced by this library.
+         */
         public fun sum(items: List<MpfrFloat>, precision: MpfrPrecision = items.widestPrecision(defaultPrecision), rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat {
             require(items.isNotEmpty()) { "sum() of an empty list is not defined in v1" }
             return MpfrFloat(MpfrBridge.sum(items.map { it.repr }.toTypedArray(), precision.bits, rnd.mpfrValueU()))
         }
 
-        /** `mpfr_dot`. */
+        /**
+         * `mpfr_dot`.
+         *
+         * Domain deviation: throws [IllegalArgumentException] when the exact product of a
+         * regular×regular pair would leave the MPFR exponent range (intermediate overflow or
+         * underflow) — upstream `mpfr_dot` does not yet handle intermediate over/underflows,
+         * and the wrapper rejects such domains instead of risking the process. Pairs with a
+         * special element (NaN/±Inf/±0) multiply exactly and are never restricted.
+         */
         public fun dot(a: List<MpfrFloat>, b: List<MpfrFloat>, precision: MpfrPrecision = (a + b).widestPrecision(defaultPrecision), rnd: RoundingMode = RoundingMode.NEAREST_EVEN): MpfrFloat {
             require(a.isNotEmpty() && a.size == b.size) { "dot() needs two non-empty lists of equal size" }
             return MpfrFloat(MpfrBridge.dot(a.map { it.repr }.toTypedArray(), b.map { it.repr }.toTypedArray(), precision.bits, rnd.mpfrValueU()))
