@@ -135,8 +135,8 @@ jobs:
           problems = []
           if lib_skipped:
               problems.append("library suite contains skipped tests — was the shim loaded?")
-if lib_tests < 148:
-            problems.append(f"library suite ran {lib_tests} tests, expected at least 148")
+          if lib_tests < 148:
+              problems.append(f"library suite ran {lib_tests} tests, expected at least 148")
           if ex_tests < 10:
               problems.append(f"examples suite ran {ex_tests} tests, expected at least 10")
           if problems:
